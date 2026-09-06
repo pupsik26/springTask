@@ -1,6 +1,8 @@
 package userservice.service;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import userservice.dto.UserDto;
+import userservice.dto.UserEventDto;
 import userservice.entity.User;
 import userservice.exception.UserNotFoundException;
 import userservice.mapper.UserMapper;
@@ -18,6 +20,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper; // Внедряем маппер
 
+    private final KafkaTemplate<String, UserEventDto> kafkaTemplate; // <-- Добавили
+
+    private static final String TOPIC_NAME = "user-events";
+
     public List<UserDto> findAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toDto)
@@ -34,6 +40,9 @@ public class UserService {
     public UserDto create(UserDto dto) {
         User user = userMapper.toEntity(dto);
         User saved = userRepository.save(user);
+
+        kafkaTemplate.send(TOPIC_NAME, new UserEventDto("CREATE", saved.getEmail()));
+
         return userMapper.toDto(saved);
     }
 
@@ -52,9 +61,11 @@ public class UserService {
 
     @Transactional
     public void delete(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException(id);
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        kafkaTemplate.send(TOPIC_NAME, new UserEventDto("DELETE", user.getEmail()));
+
         userRepository.deleteById(id);
     }
 }
