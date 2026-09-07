@@ -1,7 +1,7 @@
-package userservice.notification.controller;
+package notification.controller;
 
-import userservice.notification.dto.NotificationRequest;
-import userservice.notification.service.EmailService;
+import notification.dto.NotificationRequest;
+import notification.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

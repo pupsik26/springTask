@@ -18,9 +18,9 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper; // Внедряем маппер
+    private final UserMapper userMapper;
 
-    private final KafkaTemplate<String, UserEventDto> kafkaTemplate; // <-- Добавили
+    private final KafkaTemplate<String, UserEventDto> kafkaTemplate;
 
     private static final String TOPIC_NAME = "user-events";
 

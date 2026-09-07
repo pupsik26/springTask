@@ -1,4 +1,4 @@
-package userservice.notification.dto;
+package notification.dto;
 
 import lombok.Data;
 

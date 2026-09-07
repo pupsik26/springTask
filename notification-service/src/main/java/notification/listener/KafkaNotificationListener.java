@@ -1,7 +1,7 @@
-package userservice.notification.listener;
+package notification.listener;
 
-import userservice.dto.UserEventDto;
-import userservice.notification.service.EmailService;
+import notification.dto.UserEventDto;
+import notification.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,7 +16,8 @@ public class KafkaNotificationListener {
 
     @KafkaListener(topics = "user-events", groupId = "notification-group")
     public void listen(UserEventDto event) {
-        log.info("Получено событие из Kafka: operation={}, email={}", event.getOperation(), event.getEmail());
+        log.info("Получено событие из Kafka: operation={}, email={}",
+                event.getOperation(), event.getEmail());
         emailService.sendEmail(event.getEmail(), event.getOperation());
     }
 }

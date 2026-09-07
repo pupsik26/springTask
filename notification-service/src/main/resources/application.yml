@@ -1,21 +1,14 @@
+server:
+  port: 8081
+
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/mydb
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
   kafka:
     bootstrap-servers: localhost:9092
+
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
     consumer:
       group-id: notification-group
       auto-offset-reset: earliest
@@ -24,5 +17,18 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
-server:
-  port: 8080
+  mail:
+    host: localhost
+    port: 2525
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+app:
+  from-email: noreply@mysite.com
+  site-name: "Мой сайт"

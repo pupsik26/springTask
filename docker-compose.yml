@@ -37,5 +37,13 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
+    container_name: smtp4dev
+    ports:
+      - "3000:80"   # веб-интерфейс
+      - "2525:25"   # SMTP
+    restart: unless-stopped
+
 volumes:
   postgres_data:
