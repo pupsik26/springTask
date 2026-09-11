@@ -1,5 +1,7 @@
 package notification.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import notification.dto.UserEventDto;
 import notification.service.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +15,20 @@ import org.springframework.stereotype.Component;
 public class KafkaNotificationListener {
 
     private final EmailService emailService;
+    private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "user-events", groupId = "notification-group")
-    public void listen(UserEventDto event) {
-        log.info("Получено событие из Kafka: operation={}, email={}",
-                event.getOperation(), event.getEmail());
-        emailService.sendEmail(event.getEmail(), event.getOperation());
+    public void listen(String message) {
+        try {
+            UserEventDto event = objectMapper.readValue(message, UserEventDto.class);
+
+            log.info("Получено событие из Kafka: operation={}, email={}",
+                    event.getOperation(), event.getEmail());
+
+            emailService.sendEmail(event.getEmail(), event.getOperation());
+
+        } catch (JsonProcessingException e) {
+            log.error("Ошибка парсинга сообщения из Kafka: {}", message, e);
+        }
     }
 }

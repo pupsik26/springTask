@@ -47,8 +47,9 @@ class UserControllerTest {
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Ivan"))
-                .andExpect(jsonPath("$[0].email").value("ivan@example.com"));
+                .andExpect(jsonPath("$._embedded.userDtoList[0].name").value("Ivan"))
+                .andExpect(jsonPath("$._embedded.userDtoList[0].email").value("ivan@example.com"))
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     // ---------- GET BY ID ----------
@@ -73,7 +74,7 @@ class UserControllerTest {
                 .age(25)
                 .build();
 
-        UserDto saved = sampleDto(); // с id=1
+        UserDto saved = sampleDto();
         when(userService.create(any(UserDto.class))).thenReturn(saved);
 
         mockMvc.perform(post("/api/users")
@@ -89,9 +90,9 @@ class UserControllerTest {
     @Test
     void create_invalidData_returns400() throws Exception {
         UserDto bad = UserDto.builder()
-                .name("")           // @NotBlank violation
-                .email("not-email") // @Email violation
-                .age(-1)            // @Min violation
+                .name("")
+                .email("not-email")
+                .age(-1)
                 .build();
 
         mockMvc.perform(post("/api/users")
