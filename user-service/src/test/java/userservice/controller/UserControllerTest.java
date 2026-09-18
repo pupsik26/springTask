@@ -47,8 +47,11 @@ class UserControllerTest {
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.userDtoList[0].id").value(1))
                 .andExpect(jsonPath("$._embedded.userDtoList[0].name").value("Ivan"))
                 .andExpect(jsonPath("$._embedded.userDtoList[0].email").value("ivan@example.com"))
+                .andExpect(jsonPath("$._embedded.userDtoList[0]._links.self.href").exists())
+                .andExpect(jsonPath("$._embedded.userDtoList[0]._links.users.href").exists())
                 .andExpect(jsonPath("$._links.self.href").exists());
     }
 
