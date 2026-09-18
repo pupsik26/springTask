@@ -15,3 +15,17 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  springdoc:
+    api-docs:
+      path: /api-docs          # URL JSON-описания API
+    swagger-ui:
+      path: /swagger-ui.html   # URL веб-интерфейса
+      tags-sorter: alpha       # сортировка тегов по алфавиту
+      operations-sorter: alpha # сортировка операций по алфавиту
+    info:
+      title: User Service API
+      description: API для управления пользователями
+      version: 1.0.0
+      contact:
+        name: Vadim
+        email: vadim@example.com

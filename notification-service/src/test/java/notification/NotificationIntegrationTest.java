@@ -61,38 +61,41 @@ class NotificationIntegrationTest {
 
         SimpleMailMessage sentMessage = captor.getValue();
         assertEquals("test@example.com", sentMessage.getTo()[0]);
+        assertEquals("Регистрация на сайте Мой сайт", sentMessage.getSubject());
         assertTrue(sentMessage.getText().contains("был успешно создан"));
     }
 
     @Test
-    void kafkaListener_onCreateEvent_shouldSendEmail() throws Exception {
-        UserEventDto event = new UserEventDto("CREATE", "kafka-create@example.com");
+    void sendDirectNotification_delete_shouldSendEmailWithCorrectText() throws Exception {
+        NotificationRequest request = new NotificationRequest();
+        request.setEmail("delete@example.com");
+        request.setOperation("DELETE");
 
-        kafkaTemplate.send("user-events", event).get();
+        mockMvc.perform(post("/api/notifications/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
-            verify(mailSender, atLeastOnce()).send(captor.capture());
+        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(mailSender, times(1)).send(captor.capture());
 
-            SimpleMailMessage sentMessage = captor.getValue();
-            assertEquals("kafka-create@example.com", sentMessage.getTo()[0]);
-            assertTrue(sentMessage.getText().contains("был успешно создан"));
-        });
+        SimpleMailMessage sentMessage = captor.getValue();
+        assertEquals("delete@example.com", sentMessage.getTo()[0]);
+        assertEquals("Ваш аккаунт удалён", sentMessage.getSubject());
+        assertTrue(sentMessage.getText().contains("был удалён"));
     }
 
     @Test
-    void kafkaListener_onDeleteEvent_shouldSendEmail() throws Exception {
-        UserEventDto event = new UserEventDto("DELETE", "kafka-delete@example.com");
+    void sendDirectNotification_unknownOperation_shouldNotSendEmail() throws Exception {
+        NotificationRequest request = new NotificationRequest();
+        request.setEmail("unknown@example.com");
+        request.setOperation("UNKNOWN_OP");
 
-        kafkaTemplate.send("user-events", event).get();
+        mockMvc.perform(post("/api/notifications/send")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
-            verify(mailSender, atLeastOnce()).send(captor.capture());
-
-            SimpleMailMessage sentMessage = captor.getValue();
-            assertEquals("kafka-delete@example.com", sentMessage.getTo()[0]);
-            assertTrue(sentMessage.getText().contains("был удалён"));
-        });
+        verify(mailSender, never()).send(any(SimpleMailMessage.class));
     }
 }

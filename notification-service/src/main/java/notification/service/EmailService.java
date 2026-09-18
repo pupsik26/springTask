@@ -2,7 +2,9 @@ package notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import notification.dto.OperationType;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -21,27 +23,26 @@ public class EmailService {
     private String siteName;
 
     public void sendEmail(String toEmail, String operation) {
-        String subject;
-        String text;
-
-        if ("CREATE".equalsIgnoreCase(operation)) {
-            subject = "Регистрация на сайте " + siteName;
-            text = "Здравствуйте! Ваш аккаунт на сайте " + siteName + " был успешно создан.";
-        } else if ("DELETE".equalsIgnoreCase(operation)) {
-            subject = "Ваш аккаунт удалён";
-            text = "Здравствуйте! Ваш аккаунт был удалён.";
-        } else {
-            log.warn("Неизвестная операция: {}", operation);
+        OperationType type;
+        try {
+            type = OperationType.fromString(operation);
+        } catch (IllegalArgumentException e) {
+            log.error("Неизвестная операция '{}'. Письмо не отправлено на [{}]", operation, toEmail);
             return;
         }
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(toEmail);
-        message.setSubject(subject);
-        message.setText(text);
+        message.setSubject(type.getSubject(siteName));
+        message.setText(type.getText(siteName));
 
-        mailSender.send(message);
-        log.info("Письмо успешно отправлено на [{}]: {}", toEmail, text);
+        try {
+            mailSender.send(message);
+            log.info("Письмо успешно отправлено на [{}] | Тема: {}", toEmail, message.getSubject());
+        } catch (MailException e) {
+            log.error("Не удалось отправить письмо на [{}] для операции {}. " +
+                    "Причина: {}", toEmail, operation, e.getMessage(), e);
+        }
     }
 }
