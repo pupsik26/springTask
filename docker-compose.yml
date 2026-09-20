@@ -41,8 +41,8 @@ services:
     image: rnwood/smtp4dev:latest
     container_name: smtp4dev
     ports:
-      - "3000:80"   # веб-интерфейс
-      - "2525:25"   # SMTP
+      - "3000:80"
+      - "2525:25"
     restart: unless-stopped
 
 volumes:
