@@ -4,15 +4,17 @@ server:
 spring:
   application:
     name: api-gateway
+  config:
+    import: optional:configserver:http://localhost:8888
   cloud:
     gateway:
       discovery:
         locator:
-          enabled: true  # Автоматически создаёт роуты на основе Eureka
+          enabled: true
           lower-case-service-id: true
       routes:
         - id: user-service
-          uri: lb://USER-SERVICE  # lb = load balance через Eureka
+          uri: lb://USER-SERVICE
           predicates:
             - Path=/api/users/**
           filters:
@@ -31,15 +33,13 @@ spring:
                 name: notificationServiceCircuitBreaker
                 fallbackUri: forward:/fallback/notification
 
-  # Настройки Resilience4j для Circuit Breaker
-  cloud:
     circuitbreaker:
       resilience4j:
         configs:
           default:
             slidingWindowSize: 10
             failureRateThreshold: 50
-            waitDurationInOpenState: 10000  # 10 секунд в состоянии OPEN
+            waitDurationInOpenState: 10000
             permittedNumberOfCallsInHalfOpenState: 3
 
 eureka:
