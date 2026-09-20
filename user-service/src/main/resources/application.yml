@@ -2,26 +2,20 @@ server:
   port: 8080
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/mydb
-    username: postgres
-    password: postgres
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   springdoc:
     api-docs:
-      path: /api-docs          # URL JSON-описания API
+      path: /api-docs
     swagger-ui:
-      path: /swagger-ui.html   # URL веб-интерфейса
-      tags-sorter: alpha       # сортировка тегов по алфавиту
-      operations-sorter: alpha # сортировка операций по алфавиту
+      path: /swagger-ui.html
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,info,circuitbreakers,circuitbreakerevents
+    endpoint:
+      health:
+        show-details: always
     info:
       title: User Service API
       description: API для управления пользователями
