@@ -11,7 +11,7 @@ import org.springframework.hateoas.RepresentationModel;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDto extends RepresentationModel<UserDto> {
+public class UserDto {
 
     private Long id;
 

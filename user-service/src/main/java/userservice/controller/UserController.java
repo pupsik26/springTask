@@ -31,7 +31,7 @@ public class UserController {
     @Operation(summary = "Получить всех пользователей")
     public ResponseEntity<CollectionModel<EntityModel<UserDto>>> getAll() {
         List<EntityModel<UserDto>> users = userService.findAll().stream()
-                .map(this::addLinks)
+                .map(this::toEntityModel)
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<UserDto>> collectionModel = CollectionModel.of(users);
@@ -52,7 +52,7 @@ public class UserController {
     public ResponseEntity<EntityModel<UserDto>> getById(
             @Parameter(description = "ID пользователя") @PathVariable Long id) {
         UserDto user = userService.findById(id);
-        return ResponseEntity.ok(addLinks(user));
+        return ResponseEntity.ok(toEntityModel(user));
     }
 
     @PostMapping
@@ -63,7 +63,7 @@ public class UserController {
     })
     public ResponseEntity<EntityModel<UserDto>> create(@Valid @RequestBody UserDto dto) {
         UserDto created = userService.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(addLinks(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toEntityModel(created));
     }
 
     @PutMapping("/{id}")
@@ -72,7 +72,7 @@ public class UserController {
             @PathVariable Long id,
             @Valid @RequestBody UserDto dto) {
         UserDto updated = userService.update(id, dto);
-        return ResponseEntity.ok(addLinks(updated));
+        return ResponseEntity.ok(toEntityModel(updated));
     }
 
     @DeleteMapping("/{id}")
@@ -86,19 +86,19 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    private EntityModel<UserDto> addLinks(UserDto user) {
+    private EntityModel<UserDto> toEntityModel(UserDto user) {
         EntityModel<UserDto> resource = EntityModel.of(user);
 
         resource.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
-                                .getById(user.getId()))
-                        .withSelfRel()
+                WebMvcLinkBuilder.linkTo(
+                        WebMvcLinkBuilder.methodOn(UserController.class).getById(user.getId())
+                ).withSelfRel()
         );
 
         resource.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
-                                .getAll())
-                        .withRel("users")
+                WebMvcLinkBuilder.linkTo(
+                        WebMvcLinkBuilder.methodOn(UserController.class).getAll()
+                ).withRel("users")
         );
 
         return resource;
